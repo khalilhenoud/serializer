@@ -94,6 +94,8 @@ int main(int argc, char *argv[])
 
   std::cout << "Jha" << std::endl;
 
+  serialize_bin(nullptr, nullptr);
+
   // test_ase(ase_file, &allocator);
   // test_csv(csv_file, &allocator);
   // test_png(png_file, &allocator);

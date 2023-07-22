@@ -11,16 +11,14 @@ project(serializer_test VERSION 1.0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-add_subdirectory(../serializer serializer)
-
 # add the executable
 add_executable(${PROJECT_NAME} 
 				./source/main.cpp
 				)
 			
 target_link_libraries(${PROJECT_NAME}
-						PRIVATE serializer
-						)
+				PRIVATE serializer
+				)
 
 target_include_directories(${PROJECT_NAME} PUBLIC 
 							"${PROJECT_BINARY_DIR}"
