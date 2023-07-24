@@ -78,12 +78,8 @@ void test_png(const char* path, const allocator_t* allocator)
 
 int main(int argc, char *argv[])
 {
-  // assert(argc >= 2 && "provide path to ase file!");
-  // const char* ase_file = argv[1];
-  // assert(argc >= 3 && "provide path to csv file!");
-  // const char* csv_file = argv[2];
-  // assert(argc >= 4 && "provide path to png file!");
-  // const char* png_file = argv[3];
+  assert(argc >= 2 && "provide path to bin file!");
+  const char* bin_file = argv[1];
 
   allocator_t allocator;
   allocator.mem_alloc = allocate;
@@ -92,13 +88,14 @@ int main(int argc, char *argv[])
   allocator.mem_alloc_alligned = NULL;
   allocator.mem_realloc = NULL;
 
-  std::cout << "Jha" << std::endl;
+  std::cout << "attempting to deserialize media\test01.bin: " << std::endl;
+  auto* bin_data = ::deserialize_bin(bin_file, &allocator);
+  std::cout << "printing all texture path" << std::endl;
+  for (uint32_t i = 0; i < bin_data->texture_repo.used; ++i)
+    std::cout << '\t' << bin_data->texture_repo.data[i].path.data << std::endl;
+  ::free_bin(bin_data, &allocator);
 
-  serialize_bin(nullptr, nullptr);
-
-  // test_ase(ase_file, &allocator);
-  // test_csv(csv_file, &allocator);
-  // test_png(png_file, &allocator);
+  assert(allocated.size() == 0);
 
   return 0;
 }
