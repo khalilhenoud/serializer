@@ -44,38 +44,6 @@ void free_block(void* block)
   free(block);
 }
 
-#if 0
-void test_ase(const char* path, const allocator_t* allocator)
-{
-  std::cout << "loading ase: " << path << std::endl;
-  loader_ase_data_t* data = load_ase(path, allocator);
-  free_ase(data, allocator);
-
-  assert(allocated.size() == 0 && "memory leak detected!");
-  std::cout << "loading successful" << std::endl;
-}
-
-void test_csv(const char* path, const allocator_t* allocator)
-{
-  std::cout << "loading csv: " << path << std::endl;
-  loader_csv_font_data_t* data = load_csv(path, allocator);
-  free_csv(data, allocator);
-
-  assert(allocated.size() == 0 && "memory leak detected!");
-  std::cout << "loading successful" << std::endl;
-}
-
-void test_png(const char* path, const allocator_t* allocator)
-{
-  std::cout << "loading png: " << path << std::endl;
-  loader_png_data_t* data = load_png(path, allocator);
-  free_png(data, allocator);
-
-  assert(allocated.size() == 0 && "memory leak detected!");
-  std::cout << "loading successful" << std::endl;
-}
-#endif
-
 int main(int argc, char *argv[])
 {
   assert(argc >= 2 && "provide path to bin file!");
