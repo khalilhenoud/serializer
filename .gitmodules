@@ -1,12 +1,6 @@
-[submodule "serializer/external/math"]
-	path = serializer/external/math
+[submodule "serializer_test/external/math"]
+	path = serializer_test/external/math
 	url = https://github.com/khalilhenoud/math.git
-[submodule "serializer/external/library"]
-	path = serializer/external/library
+[submodule "serializer_test/external/library"]
+	path = serializer_test/external/library
 	url = https://github.com/khalilhenoud/library.git
-[submodule "external/library"]
-	path = external/library
-	url = https://github.com/khalilhenoud/library.git
-[submodule "external/math"]
-	path = external/math
-	url = https://github.com/khalilhenoud/math.git
