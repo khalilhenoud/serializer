@@ -163,65 +163,69 @@ deserialize_bin(
 
     // deserialize texture data.
     read_buffer(file, &scene->texture_repo.used, sizeof(uint32_t), 1);
-    scene->texture_repo.data = 
-      (serializer_texture_data_t *)allocator->mem_cont_alloc(
-        scene->texture_repo.used, 
-        sizeof(serializer_texture_data_t));
-    {
-      serializer_texture_data_t* data = scene->texture_repo.data;
-      for (uint32_t i = 0; i < scene->texture_repo.used; ++i, ++data) {
-        read_buffer(
-          file,
-          data->path.data,
-          sizeof(data->path.data[0]), sizeof(data->path.data));
+    if (scene->texture_repo.used) {
+      scene->texture_repo.data =
+        (serializer_texture_data_t*)allocator->mem_cont_alloc(
+          scene->texture_repo.used,
+          sizeof(serializer_texture_data_t));
+      {
+        serializer_texture_data_t* data = scene->texture_repo.data;
+        for (uint32_t i = 0; i < scene->texture_repo.used; ++i, ++data) {
+          read_buffer(
+            file,
+            data->path.data,
+            sizeof(data->path.data[0]), sizeof(data->path.data));
+        }
       }
     }
 
     // deserialize material data.
     read_buffer(file, &scene->material_repo.used, sizeof(uint32_t), 1);
-    scene->material_repo.data = 
-      (serializer_material_data_t *)allocator->mem_cont_alloc(
-        scene->material_repo.used, 
-        sizeof(serializer_material_data_t));
-    {
-      serializer_material_data_t* data = scene->material_repo.data;
-      for (uint32_t i = 0; i < scene->material_repo.used; ++i, ++data) {
-        read_buffer(
-          file, 
-          data->name.data, 
-          sizeof(data->name.data[0]), sizeof(data->name.data));
+    if (scene->material_repo.used) {
+      scene->material_repo.data =
+        (serializer_material_data_t*)allocator->mem_cont_alloc(
+          scene->material_repo.used,
+          sizeof(serializer_material_data_t));
+      {
+        serializer_material_data_t* data = scene->material_repo.data;
+        for (uint32_t i = 0; i < scene->material_repo.used; ++i, ++data) {
+          read_buffer(
+            file,
+            data->name.data,
+            sizeof(data->name.data[0]), sizeof(data->name.data));
 
-        read_buffer(
-          file, data->ambient.data, sizeof(data->ambient.data[0]), 4);
-        read_buffer(
-          file, data->diffuse.data, sizeof(data->diffuse.data[0]), 4);
-        read_buffer(
-          file, data->specular.data, sizeof(data->specular.data[0]), 4);
-        read_buffer(file, &data->shininess, sizeof(float), 1);
-        read_buffer(file, &data->opacity, sizeof(float), 1);
+          read_buffer(
+            file, data->ambient.data, sizeof(data->ambient.data[0]), 4);
+          read_buffer(
+            file, data->diffuse.data, sizeof(data->diffuse.data[0]), 4);
+          read_buffer(
+            file, data->specular.data, sizeof(data->specular.data[0]), 4);
+          read_buffer(file, &data->shininess, sizeof(float), 1);
+          read_buffer(file, &data->opacity, sizeof(float), 1);
 
-        // deserialize the texture properties array.
-        read_buffer(file, &data->textures.used, sizeof(uint32_t), 1);
-        {
-          serializer_texture_properties_t* texture_data = data->textures.data;
-          for (uint32_t j = 0; j < data->textures.used; ++j, ++texture_data) {
-            // index into the texture repo.
-            read_buffer(file, &texture_data->index, sizeof(uint32_t), 1);
-            read_buffer(
-              file, 
-              texture_data->name.data,
-              sizeof(texture_data->name.data[0]), 
-              sizeof(texture_data->name.data));
-            read_buffer(
-              file, 
-              texture_data->type.data,
-              sizeof(texture_data->type.data[0]), 
-              sizeof(texture_data->type.data));
-            read_buffer(file, &texture_data->u, sizeof(float), 1);
-            read_buffer(file, &texture_data->v, sizeof(float), 1);
-            read_buffer(file, &texture_data->u_scale, sizeof(float), 1);
-            read_buffer(file, &texture_data->v_scale, sizeof(float), 1);
-            read_buffer(file, &texture_data->angle, sizeof(float), 1);
+          // deserialize the texture properties array.
+          read_buffer(file, &data->textures.used, sizeof(uint32_t), 1);
+          {
+            serializer_texture_properties_t* texture_data = data->textures.data;
+            for (uint32_t j = 0; j < data->textures.used; ++j, ++texture_data) {
+              // index into the texture repo.
+              read_buffer(file, &texture_data->index, sizeof(uint32_t), 1);
+              read_buffer(
+                file,
+                texture_data->name.data,
+                sizeof(texture_data->name.data[0]),
+                sizeof(texture_data->name.data));
+              read_buffer(
+                file,
+                texture_data->type.data,
+                sizeof(texture_data->type.data[0]),
+                sizeof(texture_data->type.data));
+              read_buffer(file, &texture_data->u, sizeof(float), 1);
+              read_buffer(file, &texture_data->v, sizeof(float), 1);
+              read_buffer(file, &texture_data->u_scale, sizeof(float), 1);
+              read_buffer(file, &texture_data->v_scale, sizeof(float), 1);
+              read_buffer(file, &texture_data->angle, sizeof(float), 1);
+            }
           }
         }
       }
