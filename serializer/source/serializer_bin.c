@@ -319,8 +319,10 @@ free_bin(
   assert(scene != NULL && "scene is NULL!");
   assert(allocator != NULL && "allocator is NULL!");
 
-  allocator->mem_free(scene->texture_repo.data);
-  allocator->mem_free(scene->material_repo.data);
+  if (scene->texture_repo.used)
+    allocator->mem_free(scene->texture_repo.data);
+  if (scene->material_repo.used)
+    allocator->mem_free(scene->material_repo.data);
   {
     serializer_mesh_data_t* data = scene->mesh_repo.data;
     for (uint32_t i = 0; i < scene->mesh_repo.used; ++i, ++data) {
