@@ -26,7 +26,7 @@ struct {
   uint32_t index;               // index into texture repo.
   fixed_str_t name;
   fixed_str_t type;
-  float u, v;       // TODO: Consider replacing this with a 3 x 3 matrix.
+  float u, v;
   float u_scale, v_scale;
   float angle;
 } serializer_texture_properties_t;
