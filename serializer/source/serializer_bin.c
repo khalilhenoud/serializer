@@ -160,6 +160,7 @@ deserialize_bin(
     scene = (serializer_scene_data_t*)allocator->mem_alloc(
       sizeof(serializer_scene_data_t));
     assert(scene != NULL && "failed to allocate scene");
+    memset(scene, 0, sizeof(serializer_scene_data_t));
 
     // deserialize texture data.
     read_buffer(file, &scene->texture_repo.used, sizeof(uint32_t), 1);
@@ -323,6 +324,10 @@ free_bin(
   assert(scene != NULL && "scene is NULL!");
   assert(allocator != NULL && "allocator is NULL!");
 
+  if (scene->font_repo.used)
+    allocator->mem_free(scene->font_repo.data);
+  if (scene->camera_repo.used)
+    allocator->mem_free(scene->camera_repo.data);
   if (scene->texture_repo.used)
     allocator->mem_free(scene->texture_repo.data);
   if (scene->material_repo.used)

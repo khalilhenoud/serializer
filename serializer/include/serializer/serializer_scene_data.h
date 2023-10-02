@@ -14,6 +14,7 @@
 #include <stdint.h>
 #include <library/string/fixed_string.h>
 #include <math/c/matrix4f.h>
+#include <math/c/vector3f.h>
 
 
 typedef
@@ -83,6 +84,31 @@ struct {
 
 typedef
 struct {
+  fixed_str_t image_file;
+  fixed_str_t data_file;
+} serializer_font_t;
+
+typedef
+struct {
+  vector3f position;
+  vector3f lookat_direction;
+  vector3f up_vector;
+} serializer_camera_t;
+
+typedef
+struct {
+  uint32_t used;
+  serializer_font_t *data;
+} serializer_font_repo_t;
+
+typedef
+struct {
+  uint32_t used;
+  serializer_camera_t *data;
+} serializer_camera_repo_t;
+
+typedef
+struct {
   uint32_t used;
   serializer_texture_data_t *data;
 } serializer_texture_repo_t;
@@ -111,6 +137,9 @@ struct serializer_scene_data_t {
   serializer_mesh_repo_t mesh_repo;
   serializer_material_repo_t material_repo;
   serializer_texture_repo_t texture_repo;
+  // TODO(khalil): Currently these repos are not being serialized, do so.
+  serializer_font_repo_t font_repo;
+  serializer_camera_repo_t camera_repo;
 } serializer_scene_data_t;
 
 
