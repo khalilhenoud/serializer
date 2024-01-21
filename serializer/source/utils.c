@@ -23,7 +23,9 @@ open_file(
   char cstr_flags[8];
   int32_t read = (flags & FILE_OPEN_MODE_READ) / FILE_OPEN_MODE_READ;
   int32_t write = (flags & FILE_OPEN_MODE_WRITE) / FILE_OPEN_MODE_WRITE;
-  int32_t write_no_overwrite = (flags & FILE_OPEN_MODE_WRITE_NO_OVERWRITE) / FILE_OPEN_MODE_WRITE_NO_OVERWRITE;
+  int32_t write_no_overwrite = 
+    (flags & FILE_OPEN_MODE_WRITE_NO_OVERWRITE) / 
+    FILE_OPEN_MODE_WRITE_NO_OVERWRITE;
   int32_t append = (flags & FILE_OPEN_MODE_APPEND) / FILE_OPEN_MODE_APPEND;
 
   assert(path != NULL && "path cannot be null");

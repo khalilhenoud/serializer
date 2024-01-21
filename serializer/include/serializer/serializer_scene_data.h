@@ -74,6 +74,31 @@ struct {
   fixed_idx_to_target_t materials;
 } serializer_mesh_data_t;
 
+typedef
+enum {
+  SERIALIZER_LIGHT_TYPE_POINT,
+  SERIALIZER_LIGHT_TYPE_SPOT,
+  SERIALIZER_LIGHT_TYPE_DIRECTIONAL,
+  SERIALIZER_LUGHT_TYPE_COUNT
+} serializer_light_type_t;
+
+typedef
+struct {
+  fixed_str_t name;
+  vector3f position;
+  vector3f direction;
+  vector3f up;
+  float inner_cone;
+  float outer_cone;
+  float attenuation_constant;
+  float attenuation_linear;
+  float attenuation_quadratic;
+  serializer_color_data_t diffuse;
+  serializer_color_data_t specular;
+  serializer_color_data_t ambient;
+  serializer_light_type_t type;
+} serializer_light_data_t;
+
 typedef 
 struct {
   fixed_str_t name;
@@ -107,6 +132,12 @@ struct {
   serializer_camera_t *data;
 } serializer_camera_repo_t;
 
+typedef 
+struct {
+  uint32_t used;
+  serializer_light_data_t *data;
+} serializer_light_repo_t;
+
 typedef
 struct {
   uint32_t used;
@@ -134,6 +165,7 @@ struct {
 typedef
 struct serializer_scene_data_t {
   serializer_model_repo_t model_repo;   // root = model_repo.data[0]
+  serializer_light_repo_t light_repo;
   serializer_mesh_repo_t mesh_repo;
   serializer_material_repo_t material_repo;
   serializer_texture_repo_t texture_repo;

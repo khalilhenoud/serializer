@@ -24,6 +24,48 @@ serialize_bin(
   file = open_file(path, FILE_OPEN_MODE_WRITE | FILE_OPEN_MODE_BINARY);
   assert((void *)file != NULL);
 
+  // serializer light data.
+  write_buffer(file, &scene->light_repo.used, sizeof(uint32_t), 1);
+  {
+    serializer_light_data_t *data = scene->light_repo.data;
+    for (uint32_t i = 0; i < scene->light_repo.used; ++i, ++data) {
+      write_buffer(
+        file,
+        data->name.data,
+        sizeof(data->name.data[0]), sizeof(data->name.data));
+      write_buffer(
+        file, data->position.data, sizeof(data->position.data[0]), 3);
+      write_buffer(
+        file, data->direction.data, sizeof(data->direction.data[0]), 3);
+      write_buffer(
+        file, data->up.data, sizeof(data->up.data[0]), 3);
+      write_buffer(file, &data->inner_cone, sizeof(data->inner_cone), 1);
+      write_buffer(file, &data->outer_cone, sizeof(data->outer_cone), 1);
+      write_buffer(
+        file, 
+        &data->attenuation_constant, 
+        sizeof(data->attenuation_constant), 
+        1);
+      write_buffer(
+        file, 
+        &data->attenuation_linear, 
+        sizeof(data->attenuation_linear), 
+        1);
+      write_buffer(
+        file, 
+        &data->attenuation_quadratic, 
+        sizeof(data->attenuation_quadratic), 
+        1);
+      write_buffer(
+        file, data->diffuse.data, sizeof(data->diffuse.data[0]), 4);
+      write_buffer(
+        file, data->specular.data, sizeof(data->specular.data[0]), 4);
+      write_buffer(
+        file, data->ambient.data, sizeof(data->ambient.data[0]), 4);
+      write_buffer(file, &data->type, sizeof(data->type), 1);
+    }
+  }
+
   // serialize texture data.
   write_buffer(file, &scene->texture_repo.used, sizeof(uint32_t), 1);
   {
@@ -106,7 +148,8 @@ serialize_bin(
         file, data->uvs, sizeof(float), data->vertices_count * 3);
       // serialize faces data.
       write_buffer(file, &data->faces_count, sizeof(uint32_t), 1);
-      write_buffer(file, data->indices, sizeof(uint32_t), data->faces_count * 3);
+      write_buffer(
+        file, data->indices, sizeof(uint32_t), data->faces_count * 3);
 
       // serializing material indices.
       write_buffer(file, &data->materials.used, sizeof(uint32_t), 1);
@@ -131,7 +174,7 @@ serialize_bin(
         data->transform.data, 
         sizeof(data->transform.data[0]), 16);
 
-      // write meshes indices, and models indices;
+      // write meshes indices, model indices, light indices.
       write_buffer(file, &data->meshes.used, sizeof(uint32_t), 1);
       write_buffer(
         file, data->meshes.indices, sizeof(uint32_t), data->meshes.used);
@@ -161,6 +204,54 @@ deserialize_bin(
       sizeof(serializer_scene_data_t));
     assert(scene != NULL && "failed to allocate scene");
     memset(scene, 0, sizeof(serializer_scene_data_t));
+
+    // deserializer lights data.
+    read_buffer(file, &scene->light_repo.used, sizeof(uint32_t), 1);
+    if (scene->light_repo.used) {
+      scene->light_repo.data = 
+      (serializer_light_data_t*)allocator->mem_cont_alloc(
+        scene->light_repo.used, 
+        sizeof(serializer_light_data_t));
+      {
+        serializer_light_data_t* data = scene->light_repo.data;
+        for (uint32_t i = 0; i < scene->light_repo.used; ++i, ++data) {
+          read_buffer(
+            file,
+            data->name.data,
+            sizeof(data->name.data[0]), sizeof(data->name.data));
+          read_buffer(
+            file, data->position.data, sizeof(data->position.data[0]), 3);
+          read_buffer(
+            file, data->direction.data, sizeof(data->direction.data[0]), 3);
+          read_buffer(
+            file, data->up.data, sizeof(data->up.data[0]), 3);
+          read_buffer(file, &data->inner_cone, sizeof(data->inner_cone), 1);
+          read_buffer(file, &data->outer_cone, sizeof(data->outer_cone), 1);
+          read_buffer(
+            file, 
+            &data->attenuation_constant, 
+            sizeof(data->attenuation_constant), 
+            1);
+          read_buffer(
+            file, 
+            &data->attenuation_linear, 
+            sizeof(data->attenuation_linear), 
+            1);
+          read_buffer(
+            file, 
+            &data->attenuation_quadratic, 
+            sizeof(data->attenuation_quadratic), 
+            1);
+          read_buffer(
+            file, data->diffuse.data, sizeof(data->diffuse.data[0]), 4);
+          read_buffer(
+            file, data->specular.data, sizeof(data->specular.data[0]), 4);
+          read_buffer(
+            file, data->ambient.data, sizeof(data->ambient.data[0]), 4);
+          read_buffer(file, &data->type, sizeof(data->type), 1);
+        }
+      }
+    }
 
     // deserialize texture data.
     read_buffer(file, &scene->texture_repo.used, sizeof(uint32_t), 1);
@@ -332,6 +423,8 @@ free_bin(
     allocator->mem_free(scene->texture_repo.data);
   if (scene->material_repo.used)
     allocator->mem_free(scene->material_repo.data);
+  if (scene->light_repo.used)
+    allocator->mem_free(scene->light_repo.data);
   {
     serializer_mesh_data_t* data = scene->mesh_repo.data;
     for (uint32_t i = 0; i < scene->mesh_repo.used; ++i, ++data) {
