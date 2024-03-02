@@ -169,9 +169,9 @@ struct serializer_scene_data_t {
   serializer_mesh_repo_t mesh_repo;
   serializer_material_repo_t material_repo;
   serializer_texture_repo_t texture_repo;
-  // TODO(khalil): Currently these repos are not being serialized, do so.
-  serializer_font_repo_t font_repo;
   serializer_camera_repo_t camera_repo;
+  // TODO(khalil): font repos are not being serialized, do so.
+  serializer_font_repo_t font_repo;
 } serializer_scene_data_t;
 
 
