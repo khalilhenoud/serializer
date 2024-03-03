@@ -223,7 +223,7 @@ serialize_cameras(
   assert(scene != NULL && "'scene' params are NULL!");
 
   write_buffer(file, &scene->camera_repo.used, sizeof(uint32_t), 1);
-  {
+  if (scene->camera_repo.used) {
     serializer_camera_t* data = scene->camera_repo.data;
     for (uint32_t i = 0; i < scene->camera_repo.used; ++i, ++data) {
       write_buffer(
@@ -522,23 +522,25 @@ deserialize_cameras(
   assert(scene != NULL && "scene is NULL!");
 
   read_buffer(file, &scene->camera_repo.used, sizeof(uint32_t), 1);
-  scene->camera_repo.data = 
+  if (scene->camera_repo.used) {
+    scene->camera_repo.data = 
     (serializer_camera_t*)allocator->mem_cont_alloc(
       scene->camera_repo.used, 
       sizeof(serializer_camera_t));
-  {
-    serializer_camera_t* data = scene->camera_repo.data;
-    for (uint32_t i = 0; i < scene->camera_repo.used; ++i, ++data) {
-      read_buffer(file, data->position.data, sizeof(data->position.data[0]), 3);
-      read_buffer(
-        file, 
-        data->lookat_direction.data, 
-        sizeof(data->lookat_direction.data[0]), 
-        3);
-      read_buffer(
-        file, 
-        data->up_vector.data, 
-        sizeof(data->up_vector.data[0]), 3);
+    {
+      serializer_camera_t* data = scene->camera_repo.data;
+      for (uint32_t i = 0; i < scene->camera_repo.used; ++i, ++data) {
+        read_buffer(file, data->position.data, sizeof(data->position.data[0]), 3);
+        read_buffer(
+          file, 
+          data->lookat_direction.data, 
+          sizeof(data->lookat_direction.data[0]), 
+          3);
+        read_buffer(
+          file, 
+          data->up_vector.data, 
+          sizeof(data->up_vector.data[0]), 3);
+      }
     }
   }
 }
