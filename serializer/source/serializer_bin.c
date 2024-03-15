@@ -171,9 +171,6 @@ serialize_meshes(
       write_buffer(file, &data->faces_count, sizeof(uint32_t), 1);
       write_buffer(
         file, data->indices, sizeof(uint32_t), data->faces_count * 3);
-      write_buffer(file, &data->per_face_tex_id, sizeof(uint32_t), 1);
-      if (data->per_face_tex_id)
-        write_buffer(file, data->face_tex, sizeof(uint32_t), data->faces_count);
 
       // serializing material indices.
       write_buffer(file, &data->materials.used, sizeof(uint32_t), 1);
@@ -466,14 +463,6 @@ deserialize_meshes(
         (uint32_t*)allocator->mem_cont_alloc(
           data->faces_count * 3, sizeof(uint32_t));
       read_buffer(file, data->indices, sizeof(uint32_t), data->faces_count * 3);
-      read_buffer(file, &data->per_face_tex_id, sizeof(uint32_t), 1);
-      if (data->per_face_tex_id) {
-        data->face_tex = 
-          (uint32_t*)allocator->mem_cont_alloc(
-            data->faces_count, sizeof(uint32_t));
-        read_buffer(file, data->face_tex, sizeof(uint32_t), data->faces_count);
-      }
-
       // deserialize material indices.
       read_buffer(file, &data->materials.used, sizeof(uint32_t), 1);
       read_buffer(
@@ -611,8 +600,6 @@ free_bin(
       allocator->mem_free(data->normals);
       allocator->mem_free(data->uvs);
       allocator->mem_free(data->indices);
-      if (data->per_face_tex_id)
-        allocator->mem_free(data->face_tex);
     }
     allocator->mem_free(scene->mesh_repo.data);
   }

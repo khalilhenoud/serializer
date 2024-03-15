@@ -71,9 +71,6 @@ struct {
   uint32_t vertices_count;
   uint32_t *indices;
   uint32_t faces_count;
-  // if set, the texture id is retrieved from face_tex.
-  uint32_t per_face_tex_id;
-  uint32_t *face_tex;
   fixed_idx_to_target_t materials;
 } serializer_mesh_data_t;
 
