@@ -186,6 +186,12 @@ struct {
 } serializer_model_repo_t;
 
 typedef
+struct {
+  uint32_t used;
+  serializer_bvh_t *data;
+} serializer_bvh_repo_t;
+
+typedef
 struct serializer_scene_data_t {
   serializer_model_repo_t model_repo;   // root = model_repo.data[0]
   serializer_light_repo_t light_repo;
