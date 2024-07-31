@@ -11,6 +11,10 @@
 #ifndef SERIALIZER_MESH_DATA_H
 #define SERIALIZER_MESH_DATA_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include <library/string/fixed_string.h>
 #include <math/c/matrix4f.h>
@@ -204,5 +208,8 @@ struct serializer_scene_data_t {
   serializer_font_repo_t font_repo;
 } serializer_scene_data_t;
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif
