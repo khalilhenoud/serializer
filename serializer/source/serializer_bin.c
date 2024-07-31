@@ -609,7 +609,7 @@ free_bin(
       allocator->mem_free(data->bounds);
       allocator->mem_free(data->faces);
       allocator->mem_free(data->nodes);
-      allocator->mem_free(data->normals)
+      allocator->mem_free(data->normals);
     }
     allocator->mem_free(scene->bvh_repo.data);
   }
