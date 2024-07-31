@@ -15,6 +15,29 @@
 #include <library/string/fixed_string.h>
 #include <math/c/matrix4f.h>
 #include <math/c/vector3f.h>
+#include <math/c/face.h>
+
+
+typedef
+struct {
+  point3f min_max[2];
+} serializer_aabb_t;
+
+typedef
+struct {
+  serializer_aabb_t bounds;
+  uint32_t left_first, tri_count;
+} serializer_bvh_node_t;
+
+typedef
+struct {
+  face_t* faces;
+  vector3f* normals;
+  serializer_aabb_t* bounds;
+  uint32_t count;
+  serializer_bvh_node_t* nodes;
+  uint32_t nodes_used;
+} serializer_bvh_t;
 
 
 typedef
@@ -170,6 +193,7 @@ struct serializer_scene_data_t {
   serializer_material_repo_t material_repo;
   serializer_texture_repo_t texture_repo;
   serializer_camera_repo_t camera_repo;
+  serializer_bvh_repo_t bvh_repo;
   // TODO(khalil): font repos are not being serialized, do so.
   serializer_font_repo_t font_repo;
 } serializer_scene_data_t;

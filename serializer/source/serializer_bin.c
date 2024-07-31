@@ -603,6 +603,16 @@ free_bin(
     }
     allocator->mem_free(scene->mesh_repo.data);
   }
+  {
+    serializer_bvh_t* data = scene->bvh_repo.data;
+    for (uint32_t i = 0; i < scene->bvh_repo.used; ++i, ++data) {
+      allocator->mem_free(data->bounds);
+      allocator->mem_free(data->faces);
+      allocator->mem_free(data->nodes);
+      allocator->mem_free(data->normals)
+    }
+    allocator->mem_free(scene->bvh_repo.data);
+  }
   allocator->mem_free(scene->model_repo.data);
   allocator->mem_free(scene);
 }
