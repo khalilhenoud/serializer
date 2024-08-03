@@ -39,7 +39,6 @@ struct {
   uint32_t nodes_used;
 } serializer_bvh_t;
 
-
 typedef
 struct {
   fixed_str_t path;
@@ -192,7 +191,14 @@ struct {
 } serializer_bvh_repo_t;
 
 typedef
+struct {
+  point3f player_start;
+  float player_angle;
+} serializer_metadata_t;
+
+typedef
 struct serializer_scene_data_t {
+  serializer_metadata_t metadata;
   serializer_model_repo_t model_repo;   // root = model_repo.data[0]
   serializer_light_repo_t light_repo;
   serializer_mesh_repo_t mesh_repo;

@@ -13,6 +13,25 @@
 #include <serializer/serializer_bin.h>
 
 
+////////////////////////////////////////////////////////////////////////////////
+static
+void
+serialize_metadata(
+  file_handle_t file, 
+  serializer_scene_data_t* scene)
+{
+  assert(scene != NULL && "'scene' params are NULL!");
+  
+  write_buffer(
+    file,
+    &scene->metadata.player_start,
+    sizeof(scene->metadata.player_start), 1);
+  write_buffer(
+    file,
+    &scene->metadata.player_angle,
+    sizeof(scene->metadata.player_angle), 1);
+}
+
 static
 void
 serialize_lights(
@@ -243,6 +262,42 @@ serialize_cameras(
   }
 }
 
+static
+void
+serialize_bvhs(
+  file_handle_t file,
+  serializer_scene_data_t* scene)
+{
+  assert(scene != NULL && "'scene' params are NULL!");
+
+  write_buffer(file, &scene->bvh_repo.used, sizeof(uint32_t), 1);
+  {
+    serializer_bvh_t* data = scene->bvh_repo.data;
+    for (uint32_t i = 0; i < scene->bvh_repo.used; ++i, ++data) {
+      // serialize the face data.
+      write_buffer(file, &data->count, sizeof(uint32_t), 1);
+      write_buffer(
+        file,
+        data->faces, 
+        sizeof(data->faces[0]), data->count);
+      write_buffer(
+        file, 
+        data->normals, 
+        sizeof(data->normals[0]), data->count);
+      write_buffer(
+        file, 
+        data->bounds, 
+        sizeof(data->bounds[0]), data->count);
+      // serialize the node data.
+      write_buffer(file, &data->nodes_used, sizeof(uint32_t), 1);
+      write_buffer(
+        file, 
+        data->nodes, 
+        sizeof(data->nodes[0]), data->nodes_used);
+    }
+  }
+}
+
 void
 serialize_bin(
   const char* path,
@@ -254,14 +309,36 @@ serialize_bin(
   file = open_file(path, FILE_OPEN_MODE_WRITE | FILE_OPEN_MODE_BINARY);
   assert((void *)file != NULL);
 
+  serialize_metadata(file, scene);
   serialize_lights(file, scene);
   serialize_textures(file, scene);
   serialize_materials(file, scene);
   serialize_meshes(file, scene);
   serialize_models(file, scene);
   serialize_cameras(file, scene);
+  serialize_bvhs(file, scene);
 
   close_file(file);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void
+deserialize_metadata(
+  file_handle_t file, 
+  serializer_scene_data_t* scene,
+  const allocator_t* allocator)
+{
+  assert(allocator != NULL && "allocator is NULL!");
+  assert(scene != NULL && "scene is NULL!");
+  
+  read_buffer(
+    file,
+    &scene->metadata.player_start,
+    sizeof(scene->metadata.player_start), 1);
+  read_buffer(
+    file,
+    &scene->metadata.player_angle,
+    sizeof(scene->metadata.player_angle), 1);
 }
 
 static
@@ -530,7 +607,8 @@ deserialize_cameras(
     {
       serializer_camera_t* data = scene->camera_repo.data;
       for (uint32_t i = 0; i < scene->camera_repo.used; ++i, ++data) {
-        read_buffer(file, data->position.data, sizeof(data->position.data[0]), 3);
+        read_buffer(
+          file, data->position.data, sizeof(data->position.data[0]), 3);
         read_buffer(
           file, 
           data->lookat_direction.data, 
@@ -540,6 +618,62 @@ deserialize_cameras(
           file, 
           data->up_vector.data, 
           sizeof(data->up_vector.data[0]), 3);
+      }
+    }
+  }
+}
+
+
+static
+void
+deserialize_bvhs(
+file_handle_t file, 
+  serializer_scene_data_t* scene,
+  const allocator_t* allocator)
+{
+  assert(allocator != NULL && "allocator is NULL!");
+  assert(scene != NULL && "scene is NULL!");
+
+  read_buffer(file, &scene->bvh_repo.used, sizeof(uint32_t), 1);
+  if (scene->bvh_repo.used) {
+    scene->bvh_repo.data = 
+    (serializer_bvh_t*)allocator->mem_cont_alloc(
+      scene->bvh_repo.used, 
+      sizeof(serializer_bvh_t));
+
+    {
+      serializer_bvh_t* data = scene->bvh_repo.data;
+      for (uint32_t i = 0; i < scene->bvh_repo.used; ++i, ++data) {
+        // deserialize the face data.
+        read_buffer(file, &data->count, sizeof(uint32_t), 1);
+        data->faces = 
+          (face_t*)allocator->mem_cont_alloc(data->count, sizeof(face_t));
+        data->normals = 
+          (vector3f*)allocator->mem_cont_alloc(data->count, sizeof(vector3f));
+        data->bounds = 
+          (serializer_aabb_t*)allocator->mem_cont_alloc(
+            data->count, sizeof(serializer_aabb_t));
+        read_buffer(
+          file,
+          data->faces, 
+          sizeof(data->faces[0]), data->count);
+        read_buffer(
+          file, 
+          data->normals, 
+          sizeof(data->normals[0]), data->count);
+        read_buffer(
+          file, 
+          data->bounds, 
+          sizeof(data->bounds[0]), data->count);
+        // deserialize the node data.
+        read_buffer(file, &data->nodes_used, sizeof(uint32_t), 1);
+        data->nodes = 
+          (serializer_bvh_node_t*)allocator->mem_cont_alloc(
+            data->nodes_used, sizeof(serializer_bvh_node_t));
+        read_buffer(
+          file, 
+          data->nodes, 
+          sizeof(data->nodes[0]), data->nodes_used);
       }
     }
   }
@@ -563,15 +697,60 @@ deserialize_bin(
     assert(scene != NULL && "failed to allocate scene");
     memset(scene, 0, sizeof(serializer_scene_data_t));
 
+    deserialize_metadata(file, scene, allocator);
     deserialize_lights(file, scene, allocator);
     deserialize_textures(file, scene, allocator);
     deserialize_materials(file, scene, allocator);
     deserialize_meshes(file, scene, allocator);
     deserialize_models(file, scene, allocator);
     deserialize_cameras(file, scene, allocator);
+    deserialize_bvhs(file, scene, allocator);
 
     close_file(file);
     return scene;
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+static
+void
+free_serializer_mesh(
+  serializer_scene_data_t* scene,
+  const allocator_t* allocator)
+{
+  assert(scene != NULL && "scene is NULL!");
+  assert(allocator != NULL && "allocator is NULL!");
+
+  if (scene->mesh_repo.used) {
+    serializer_mesh_data_t* data = scene->mesh_repo.data;
+    for (uint32_t i = 0; i < scene->mesh_repo.used; ++i, ++data) {
+      allocator->mem_free(data->vertices);
+      allocator->mem_free(data->normals);
+      allocator->mem_free(data->uvs);
+      allocator->mem_free(data->indices);
+    }
+    allocator->mem_free(scene->mesh_repo.data);
+  }
+}
+
+static
+void
+free_serializer_bvh(
+  serializer_scene_data_t* scene,
+  const allocator_t* allocator)
+{
+  assert(scene != NULL && "scene is NULL!");
+  assert(allocator != NULL && "allocator is NULL!");
+
+  if (scene->bvh_repo.used) {
+    serializer_bvh_t* data = scene->bvh_repo.data;
+    for (uint32_t i = 0; i < scene->bvh_repo.used; ++i, ++data) {
+      allocator->mem_free(data->bounds);
+      allocator->mem_free(data->faces);
+      allocator->mem_free(data->nodes);
+      allocator->mem_free(data->normals);
+    }
+    allocator->mem_free(scene->bvh_repo.data);
   }
 }
 
@@ -593,26 +772,8 @@ free_bin(
     allocator->mem_free(scene->material_repo.data);
   if (scene->light_repo.used)
     allocator->mem_free(scene->light_repo.data);
-  {
-    serializer_mesh_data_t* data = scene->mesh_repo.data;
-    for (uint32_t i = 0; i < scene->mesh_repo.used; ++i, ++data) {
-      allocator->mem_free(data->vertices);
-      allocator->mem_free(data->normals);
-      allocator->mem_free(data->uvs);
-      allocator->mem_free(data->indices);
-    }
-    allocator->mem_free(scene->mesh_repo.data);
-  }
-  {
-    serializer_bvh_t* data = scene->bvh_repo.data;
-    for (uint32_t i = 0; i < scene->bvh_repo.used; ++i, ++data) {
-      allocator->mem_free(data->bounds);
-      allocator->mem_free(data->faces);
-      allocator->mem_free(data->nodes);
-      allocator->mem_free(data->normals);
-    }
-    allocator->mem_free(scene->bvh_repo.data);
-  }
+  free_serializer_mesh(scene, allocator);
+  free_serializer_bvh(scene, allocator);
   allocator->mem_free(scene->model_repo.data);
   allocator->mem_free(scene);
 }
