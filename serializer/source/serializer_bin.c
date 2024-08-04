@@ -724,10 +724,14 @@ free_serializer_mesh(
   if (scene->mesh_repo.used) {
     serializer_mesh_data_t* data = scene->mesh_repo.data;
     for (uint32_t i = 0; i < scene->mesh_repo.used; ++i, ++data) {
-      allocator->mem_free(data->vertices);
-      allocator->mem_free(data->normals);
-      allocator->mem_free(data->uvs);
-      allocator->mem_free(data->indices);
+      if (data->vertices)
+        allocator->mem_free(data->vertices);
+      if (data->normals)
+        allocator->mem_free(data->normals);
+      if (data->uvs)
+        allocator->mem_free(data->uvs);
+      if (data->indices)
+        allocator->mem_free(data->indices);
     }
     allocator->mem_free(scene->mesh_repo.data);
   }
@@ -745,10 +749,14 @@ free_serializer_bvh(
   if (scene->bvh_repo.used) {
     serializer_bvh_t* data = scene->bvh_repo.data;
     for (uint32_t i = 0; i < scene->bvh_repo.used; ++i, ++data) {
-      allocator->mem_free(data->bounds);
-      allocator->mem_free(data->faces);
-      allocator->mem_free(data->nodes);
-      allocator->mem_free(data->normals);
+      if (data->bounds)
+        allocator->mem_free(data->bounds);
+      if (data->faces)
+        allocator->mem_free(data->faces);
+      if (data->nodes)
+        allocator->mem_free(data->nodes);
+      if (data->normals)
+        allocator->mem_free(data->normals);
     }
     allocator->mem_free(scene->bvh_repo.data);
   }
